@@ -1,28 +1,38 @@
 window.onload = init;
 
 const localModels  = 'models/';
-var scene, camera, renderer, plateau, dish, indoor, dishOnPlateau;
+const loader = new THREE.GLTFLoader();
+var scene, camera, renderer, plateau, dish, indoor, dishOnPlateau, model;
 
-class Path{
-    constructor(folderName, subset = ""){
-        this.value = localModels+folderName+'/scene.gltf';
-        this.subset = subset;
-        this.mainFolder = folderName;
+class Model{
+    constructor(metadata){
+        this.path = localModels+metadata.name+'/scene.gltf';
+        this.subset = metadata.subset;
+        this.name = metadata.name;
+        this.scale = metadata.scale;
     }
 }
 
 function init(){
-    createScene();
-    loadOven();
-    createPlateau();
-    render();
+    fetch('models.json').then(r => r.json())
+    .then(r => {
+        // Get the dish model metadata
+        let folder = window.location.search.split('fold=')[1];
+        const metadata = r.models.filter(model => model.name == folder)[0];
+        if(metadata != undefined){ model = new Model(metadata); }
+        
+        // Initialize the Three.js objects
+        createScene();
+        loadOven();
+        createPlateau();
+        render();
+    })
 }
 
 function createScene(){
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 1000 );
     camera.position.set( 15, 0, 5 );
-    //camera.lookAt( 0, 5, 0 );
 
     renderer = new THREE.WebGLRenderer();
     renderer.setClearColor(0xdddddd);
@@ -39,10 +49,11 @@ function createScene(){
 }
 
 function loadOven(){
-    // Instantiate a loader
-    const loader = new THREE.GLTFLoader();
     // Load a glTF resource
     loader.load(localModels+'oven__microwave/scene.gltf', (gltf) => {
+        let mixer = new THREE.AnimationMixer( gltf.scene );
+        let action = mixer.clipAction( gltf.animations[0] );
+        action.play()
         scene.add(gltf.scene);
         gltf.scene.traverse( (child) => {
             if(child.name === "inner_oven_6"){ 
@@ -78,18 +89,16 @@ class Plateau{
 }
 
 class Dish{
-    constructor(path){
+    constructor(){
         this.mesh = new THREE.Object3D();
-	    this.mesh.name = path.mainFolder;
-        const loader = new THREE.GLTFLoader();
-        loader.load(path.value, (gltf) => {
-            console.log(path.subset);
-            if(path.subset.length > 0){
+	    this.mesh.name = model.name;
+        loader.load(model.path, (gltf) => {
+            if(model.subset.length > 0){
                 gltf.scene.traverse( (child) => {
-                    if(child.name === path.subset){
-                        child.scale.x = 0.1;
-                        child.scale.y = 0.1;
-                        child.scale.z = 0.1;
+                    if(child.name === model.subset){
+                        child.scale.x = model.scale;
+                        child.scale.y = model.scale;
+                        child.scale.z = model.scale;
                         child.position.x = .25;
                         child.position.y = -.55;
                         child.position.z = .5;
@@ -107,15 +116,16 @@ class Dish{
 function createPlateau(){
     plateau = new Plateau();
     indoor.add(plateau.mesh);
-    createDish(new Path('ramen', subset='Bowl_mega_grp'));
+    if(model != undefined){createDish();}
+    dishOnPlateau = new THREE.Group();
+    dishOnPlateau.position.x = 0.5;
+    dishOnPlateau.add( indoor );
 }
 
 function createDish(path){
     dish = new Dish(path);
     indoor.add(dish.mesh);
-    dishOnPlateau = new THREE.Group();
-    dishOnPlateau.position.x = 0.5;
-    dishOnPlateau.add( indoor );
+    
 }
 
 function resizeRendererToDisplaySize(renderer) {
@@ -139,4 +149,4 @@ function render() {
     renderer.render(scene, camera);
 
     requestAnimationFrame(render);
-  }
+}

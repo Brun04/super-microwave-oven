@@ -1,0 +1,18 @@
+{
+    "models":[
+        {
+            "name": "ramen",
+            "subset": "Bowl_mega_grp",
+            "scale": 0.1,
+            "territory": "Japan",
+            "coordinates":[35.709026,139.731992]
+        },
+        {
+            "name": "paella",
+            "subset": "",
+            "scale": 10000000.0,
+            "territory": "Spain",
+            "coordinates":[40.416775,-3.703790]
+        }
+    ]
+}
