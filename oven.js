@@ -10,6 +10,7 @@ class Model{
         this.subset = metadata.subset;
         this.name = metadata.name;
         this.scale = metadata.scale;
+        this.pos = metadata.position;
     }
 }
 
@@ -20,7 +21,6 @@ function init(){
         let folder = window.location.search.split('fold=')[1];
         const metadata = r.models.filter(model => model.name == folder)[0];
         if(metadata != undefined){ model = new Model(metadata); }
-        
         // Initialize the Three.js objects
         createScene();
         loadOven();
@@ -93,21 +93,22 @@ class Dish{
         this.mesh = new THREE.Object3D();
 	    this.mesh.name = model.name;
         loader.load(model.path, (gltf) => {
+            var toAdd;
             if(model.subset.length > 0){
                 gltf.scene.traverse( (child) => {
                     if(child.name === model.subset){
-                        child.scale.x = model.scale;
-                        child.scale.y = model.scale;
-                        child.scale.z = model.scale;
-                        child.position.x = .25;
-                        child.position.y = -.55;
-                        child.position.z = .5;
-                        this.mesh.add(child); 
+                        toAdd = child;
+                        
                     }
                 });
-            }else{
-                this.mesh.add(gltf.scene);
-            }
+            }else{ toAdd = gltf.scene; }
+            toAdd.scale.x = model.scale;
+            toAdd.scale.y = model.scale;
+            toAdd.scale.z = model.scale;
+            toAdd.position.x = model.pos[0];
+            toAdd.position.y = model.pos[1];
+            toAdd.position.z = model.pos[2];
+            this.mesh.add(toAdd); 
             
         });
     }

@@ -4,13 +4,23 @@
             "name": "ramen",
             "subset": "Bowl_mega_grp",
             "scale": 0.1,
+            "position": [0.25, -0.55, 0.5],
             "territory": "Japan",
             "coordinates":[35.709026,139.731992]
         },
         {
+            "name": "pizza",
+            "subset": "",
+            "scale": 0.025,
+            "position": [0, -0.5, 0],
+            "territory": "Italy",
+            "coordinates":[41.902782,12.496366]
+        },
+        {
             "name": "paella",
             "subset": "",
-            "scale": 10000000.0,
+            "scale": 10.0,
+            "position": [0, -0.4, -0.8],
             "territory": "Spain",
             "coordinates":[40.416775,-3.703790]
         }
